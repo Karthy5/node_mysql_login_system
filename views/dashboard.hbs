@@ -1,0 +1,26 @@
+<h1>Welcome, {{user.name}}!</h1>
+<p>Email: {{user.email}}</p>
+
+<h2>Change Password</h2>
+
+{{#if message}}
+    <p style="color: red;">{{message}}</p>
+{{/if}}
+
+<form action="/auth/change-password" method="POST">
+    <div>
+        <label for="current_password">Current Password</label>
+        <input type="password" name="current_password" id="current_password" required>
+    </div>
+    <div>
+        <label for="new_password">New Password</label>
+        <input type="password" name="new_password" id="new_password" required>
+    </div>
+    <div>
+        <label for="confirm_new_password">Confirm New Password</label>
+        <input type="password" name="confirm_new_password" id="confirm_new_password" required>
+    </div>
+    <button type="submit">Change Password</button>
+</form>
+
+<p><a href="/auth/logout">Logout</a></p>
