@@ -1,30 +1,42 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET;
+const db = require('../config/database');
 
-// Home page route
 router.get('/', (req, res) => {
     res.render('index');
 });
 
-// Register page route
 router.get('/register', (req, res) => {
-    res.render('register'); // Renders the register form
+    res.render('register');
 });
 
-// Login page route
 router.get('/login', (req, res) => {
-    res.render('login'); // Renders the login form
+    res.render('login');
 });
 
-// Render the dashboard page
 router.get('/dashboard', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/auth/login'); // Redirect to login if the user is not logged in
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.redirect('/auth/login');
     }
 
-    const user = req.session.user;
-    res.render('dashboard', { user: user });
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        if (err) {
+            return res.redirect('/auth/login');
+        }
+
+        db.query('SELECT * FROM users WHERE id = ?', [decoded.id], (error, results) => {
+            if (error || results.length === 0) {
+                return res.redirect('/auth/login');
+            }
+
+            const user = results[0];
+            res.render('dashboard', { user: user });
+        });
+    });
 });
 
 module.exports = router;
-
