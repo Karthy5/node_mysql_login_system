@@ -1,12 +1,13 @@
-const express = require('express'); 
+const express = require('express');  
 const mysql = require('mysql');
 const path = require('path');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
+const ipBanMiddleware = require('./middleware/ipBan'); // Import the middleware
 const app = express();
 
-dotenv.config({ path: './data.env' });
+dotenv.config({ path: './.env' });
 
 const db = mysql.createConnection({
     host: process.env.DATABASE_HOST,
@@ -30,13 +31,22 @@ app.use(limiter);
 
 app.set('view engine', 'hbs');
 
+// Debugging the database connection
+console.log("Attempting to connect to MySQL...");
 db.connect((error) => {
     if (error) {
-        console.log(error);
+        console.error("Database connection error:", error);
     } else {
-        console.log('MYSQL Connected...');
+        console.log("MYSQL Connected...");
     }
 });
+
+// Make the db accessible to middleware
+app.locals.db = db;
+
+// Debug before applying middleware
+console.log("Applying IP Ban Middleware...");
+app.use(ipBanMiddleware);
 
 app.use('/', require('./routes/pages'));
 app.use('/auth', require('./routes/auth'));
